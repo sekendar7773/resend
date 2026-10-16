@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Invoice Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+        .invoice-box { max-width: 650px; width: 100%; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #4CAF50; padding-bottom: 15px; margin-bottom: 20px; }
+        .title { font-size: 24px; color: #333; font-weight: bold; margin: 0; }
+        .details { font-size: 14px; color: #555; line-height: 1.5; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; font-size: 14px; }
+        th { background-color: #f8f9fa; color: #333; }
+        .total-section { text-align: right; margin-top: 20px; font-size: 18px; color: #2e7d32; font-weight: bold; }
+        .secure-badge { background: #e8f5e9; color: #2e7d32; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 20px; display: inline-block; }
+        
+        /* নোটিশ বক্স ডিজাইন (টোটাল অ্যামাউন্টের নিচে এবং সাপোর্ট বক্সের উপরে) */
+        .notice-box { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 12px 15px; margin-top: 20px; border-radius: 4px; font-size: 13px; color: #856404; line-height: 1.5; font-weight: 500; }
+
+        /* কাস্টমার সাপোর্ট বক্স */
+        .support-box { background-color: #f1f8ff; border-left: 5px solid #007ACC; padding: 18px 20px; margin-top: 15px; border-radius: 6px; font-size: 15px; color: #333; line-height: 1.6; }
+        .support-box strong { font-size: 16px; color: #222; }
+        .support-box a { color: #007ACC; text-decoration: none; font-weight: bold; font-size: 18px; }
+        .support-box a:hover { text-decoration: underline; }
+        .support-desc { font-size: 13px; color: #555; margin-top: 5px; display: block; }
+
+        .print-btn { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-box" id="invoice-container">
+        <div class="secure-badge">🔒 Secure Verified Invoice Portal</div>
+        <div id="content">
+            <h3>Loading secure invoice...</h3>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const invNo = urlParams.get('inv');
+        const custName = urlParams.get('name');
+        const userEmail = urlParams.get('email');
+        const prodName = urlParams.get('prod');
+        const qty = urlParams.get('qty');
+        const price = urlParams.get('price');
+        const total = urlParams.get('total');
+
+        const container = document.getElementById('content');
+
+        if (!invNo || !userEmail) {
+            container.innerHTML = `<h3 style="color: red;">Access Denied! Invalid or missing secure invoice parameters.</h3>`;
+        } else {
+            container.innerHTML = `
+                <div class="header">
+                    <div>
+                        <h2 class="title">INVOICE</h2>
+                        <p class="details" style="margin: 5px 0 0 0;">Invoice ID: <strong>${invNo}</strong></p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p class="details" style="margin: 0;"><strong>Billed To:</strong> ${custName || 'Valued Customer'}</p>
+                        <p class="details" style="color: #2e7d32; font-weight: bold; margin: 3px 0 0 0;">${userEmail}</p>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Description</th>
+                            <th style="text-align: center;">Qty</th>
+                            <th style="text-align: right;">Rate</th>
+                            <th style="text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${prodName || 'Digital Product'}</td>
+                            <td style="text-align: center;">${qty || '1'}</td>
+                            <td style="text-align: right;">$${price || '0'}</td>
+                            <td style="text-align: right; font-weight: bold;">$${total || '0'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="total-section">
+                    Total Amount: $${total || '0'}
+                </div>
+
+                <!-- Highlighted Notice Box (Placed between Total and Support Box) -->
+                <div class="notice-box">
+                    <strong>Note:</strong> If you did not make this payment, please contact our billing support team below to cancel or resolve any other issues.
+                </div>
+
+                <!-- Customer Support Hotline Box -->
+                <div class="support-box">
+                    <strong>📞 Customer Support & Helpline:</strong><br>
+                    <a href="tel:+18562363962">+1 (856) 236-3962</a> <span style="font-size: 14px; font-weight: 600; color: #444;">(9:00 AM to 9:00 PM)</span>
+                    <span class="support-desc">For any inquiries or assistance, feel free to contact our support team.</span>
+                </div>
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="print-btn" onclick="window.print()">Print / Download PDF</button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
