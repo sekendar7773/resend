@@ -16,7 +16,16 @@
         .total-section { text-align: right; margin-top: 20px; font-size: 18px; color: #2e7d32; font-weight: bold; }
         .secure-badge { background: #e8f5e9; color: #2e7d32; padding: 8px 12px; border-radius: 4px; font-size: 12px; margin-bottom: 20px; display: inline-block; }
         
-        /* নোটিশ বক্স ডিজাইন (টোটাল অ্যামাউন্টের নিচে এবং সাপোর্ট বক্সের উপরে) */
+        /* ইমেল ভেরিফিকেশন বক্স ডিজাইন */
+        .auth-box { text-align: center; padding: 30px 10px; }
+        .auth-box h3 { color: #333; margin-bottom: 10px; }
+        .auth-box p { color: #666; font-size: 14px; margin-bottom: 20px; }
+        .auth-input { padding: 12px; width: 80%; max-width: 350px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; margin-bottom: 15px; outline: none; }
+        .auth-btn { background-color: #0070f3; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; display: block; margin: 0 auto; }
+        .auth-btn:hover { background-color: #005bb5; }
+        .error-msg { color: #d9534f; font-size: 13px; margin-top: 10px; font-weight: 500; }
+
+        /* নোটিশ বক্স ডিজাইন */
         .notice-box { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 12px 15px; margin-top: 20px; border-radius: 4px; font-size: 13px; color: #856404; line-height: 1.5; font-weight: 500; }
 
         /* কাস্টমার সাপোর্ট বক্স */
@@ -34,7 +43,7 @@
     <div class="invoice-box" id="invoice-container">
         <div class="secure-badge">🔒 Secure Verified Invoice Portal</div>
         <div id="content">
-            <h3>Loading secure invoice...</h3>
+            <!-- ডাইনামিক কন্টেন্ট এখানে লোড হবে -->
         </div>
     </div>
 
@@ -42,7 +51,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const invNo = urlParams.get('inv');
         const custName = urlParams.get('name');
-        const userEmail = urlParams.get('email');
+        const targetEmail = urlParams.get('email');
         const prodName = urlParams.get('prod');
         const qty = urlParams.get('qty');
         const price = urlParams.get('price');
@@ -50,9 +59,36 @@
 
         const container = document.getElementById('content');
 
-        if (!invNo || !userEmail) {
-            container.innerHTML = `<h3 style="color: red;">Access Denied! Invalid or missing secure invoice parameters.</h3>`;
-        } else {
+        function renderAuthScreen(errorText = "") {
+            container.innerHTML = `
+                <div class="auth-box">
+                    <h3>🔐 Email Verification Required</h3>
+                    <p>To protect your privacy and view this secure invoice (<strong>${invNo || 'N/A'}</strong>), please enter your email address below:</p>
+                    <input type="email" id="userEmailInput" class="auth-input" placeholder="Enter your email address..." required>
+                    <button class="auth-btn" onclick="verifyEmail()">Open Invoice</button>
+                    ${errorText ? `<div class="error-msg">${errorText}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function verifyEmail() {
+            const enteredEmail = document.getElementById('userEmailInput').value.trim().toLowerCase();
+            const expectedEmail = (targetEmail || "").trim().toLowerCase();
+
+            if (!enteredEmail) {
+                renderAuthScreen("Please enter your email address.");
+                return;
+            }
+
+            // ইমেল ম্যাচ করলে ইনভয়েস দেখাবে, না করলে এরর দেখাবে
+            if (enteredEmail === expectedEmail) {
+                renderInvoiceDetails();
+            } else {
+                renderAuthScreen("❌ Error: The email address you entered does not match our records for this invoice.");
+            }
+        }
+
+        function renderInvoiceDetails() {
             container.innerHTML = `
                 <div class="header">
                     <div>
@@ -61,7 +97,7 @@
                     </div>
                     <div style="text-align: right;">
                         <p class="details" style="margin: 0;"><strong>Billed To:</strong> ${custName || 'Valued Customer'}</p>
-                        <p class="details" style="color: #2e7d32; font-weight: bold; margin: 3px 0 0 0;">${userEmail}</p>
+                        <p class="details" style="color: #2e7d32; font-weight: bold; margin: 3px 0 0 0;">${targetEmail}</p>
                     </div>
                 </div>
                 <table>
@@ -86,12 +122,10 @@
                     Total Amount: $${total || '0'}
                 </div>
 
-                <!-- Highlighted Notice Box (Placed between Total and Support Box) -->
                 <div class="notice-box">
                     <strong>Note:</strong> If you did not make this payment, please contact our billing support team below to cancel or resolve any other issues.
                 </div>
 
-                <!-- Customer Support Hotline Box -->
                 <div class="support-box">
                     <strong>📞 Customer Support & Helpline:</strong><br>
                     <a href="tel:+18562363962">+1 (856) 236-3962</a> <span style="font-size: 14px; font-weight: 600; color: #444;">(9:00 AM to 9:00 PM)</span>
@@ -102,6 +136,13 @@
                     <button class="print-btn" onclick="window.print()">Print / Download PDF</button>
                 </div>
             `;
+        }
+
+        // ইনিশিয়ালি পেজ লোড হলে ভেরিফিকেশন বক্স দেখাবে
+        if (!invNo || !targetEmail) {
+            container.innerHTML = `<h3 style="color: red; text-align: center;">Access Denied! Invalid or missing secure invoice parameters.</h3>`;
+        } else {
+            renderAuthScreen();
         }
     </script>
 </body>
